@@ -5,7 +5,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest",
-    "build": "tsup src/index.ts --format cjs,esm --dts"
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "deploy": "gh-pages -d demo"
   },
   "keywords": [
     "number",
@@ -23,6 +24,7 @@
   "description": "",
   "devDependencies": {
     "@types/jest": "^30.0.0",
+    "gh-pages": "^6.3.0",
     "jest": "^30.0.5",
     "ts-jest": "^29.4.0",
     "tsup": "^8.5.0",

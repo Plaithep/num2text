@@ -208,15 +208,12 @@
         <div id="results" class="results"></div>
     </div>
 
-    <script src="../dist/index.js"></script>
+    <script src="dist/index.global.js"></script>
     <script>
-        // Create a global reference to the numberToWords function
-        window.numberToWords = typeof module !== 'undefined' && module.exports && module.exports.numberToWords ?
-                              module.exports.numberToWords :
-                              (typeof numberToWords !== 'undefined' ? numberToWords : null);
+        window.numberToWords = window.num2text?.numberToWords;
 
         if (!window.numberToWords) {
-            console.error('Failed to import numberToWords function from dist/index.js');
+            console.error('Failed to import numberToWords function from dist/index.global.js');
         }
 
         function convert() {

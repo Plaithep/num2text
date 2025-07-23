@@ -54,7 +54,7 @@ function numberToWords(lang: SupportedLang, num: number): string
 ## 🧪 Demo
 
 Use the interactive demo here:
-➡️ [https://your-username.github.io/num2text/](https://your-username.github.io/num2text/)
+➡️ [https://plaithep.github.io/num2text/](https://plaithep.github.io/num2text/)
 
 ---
 

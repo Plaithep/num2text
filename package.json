@@ -1,11 +1,13 @@
 {
   "name": "num2text",
+  "description": "Convert numbers into words in multiple languages",
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "test": "jest",
-    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup",
+    "prepare-demo": "npm run build && cp -r dist demo/",
     "deploy": "gh-pages -d demo"
   },
   "keywords": [
@@ -21,7 +23,6 @@
   ],
   "author": "Plaithep",
   "license": "MIT",
-  "description": "",
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "gh-pages": "^6.3.0",

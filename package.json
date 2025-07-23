@@ -1,0 +1,31 @@
+{
+  "name": "num2text",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "jest",
+    "build": "tsup src/index.ts --format cjs,esm --dts"
+  },
+  "keywords": [
+    "number",
+    "words",
+    "thai",
+    "english",
+    "chinese",
+    "japanese",
+    "korean",
+    "number-to-words",
+    "multilingual"
+  ],
+  "author": "Plaithep",
+  "license": "MIT",
+  "description": "",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.0.5",
+    "ts-jest": "^29.4.0",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
+  }
+}

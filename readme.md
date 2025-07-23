@@ -13,6 +13,15 @@ Supports numbers up to the hundreds of millions.
 
 ---
 
+## 🧪 Demo
+
+Use the interactive demo here:
+➡️ [https://plaithep.github.io/num2text/](https://plaithep.github.io/num2text/)
+
+---
+
+---
+
 ## 📦 Installation
 
 ```bash
@@ -49,14 +58,6 @@ function numberToWords(lang: SupportedLang, num: number): string
 ### Returns:
 - Text representation of the number in the selected language
 
----
-
-## 🧪 Demo
-
-Use the interactive demo here:
-➡️ [https://plaithep.github.io/num2text/](https://plaithep.github.io/num2text/)
-
----
 
 ## 🧩 Development
 

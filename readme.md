@@ -41,6 +41,12 @@ console.log(numberToWords('zh', 12345))   // 一万二千三百四十五
 console.log(numberToWords('zh-TW', 1001)) // 壹仟零壹
 console.log(numberToWords('ja', 1000000)) // 百万円
 console.log(numberToWords('ko', 1234567)) // 백이십삼만사천오백육십칠
+
+
+// with wordType option (only en, th supported)
+console.log(numberToWords('en', 125, { wordType: 'currency' })) // one hundred twenty-five dollars
+console.log(numberToWords('th', 2500, { wordType: 'currency' })) // สองพันห้าร้อยบาทถ้วน
+
 ```
 
 ---
@@ -48,13 +54,19 @@ console.log(numberToWords('ko', 1234567)) // 백이십삼만사천오백육십�
 ## 🧠 API
 
 ```ts
-function numberToWords(lang: SupportedLang, num: number): string
+function numberToWords(
+  lang: SupportedLang,
+  num: number,
+  options?: { wordType: 'words' | 'currency' }
+): string
 ```
 
 ### Parameters:
 - `lang`: `'en' | 'th' | 'zh' | 'zh-TW' | 'ja' | 'ko'`
 - `num`: Any non-negative integer ≤ 999,999,999
-
+- `options.wordType`: (optional)
+  - `words`: Default, converts to normal words 
+  - `currency`: Currency style (only supported for en and th)
 ### Returns:
 - Text representation of the number in the selected language
 
@@ -68,7 +80,3 @@ npm run test
 ```
 
 ---
-
-## 📄 License
-
-MIT © YourName

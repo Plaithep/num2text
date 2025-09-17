@@ -1,10 +1,10 @@
 // src/index.ts
-function numberToWords(lang, num) {
+function numberToWords(lang, num, options = { wordType: "words" }) {
   switch (lang) {
     case "en":
-      return numberToEnglish(num);
+      return numberToEnglish(num, options.wordType);
     case "th":
-      return numberToThai(num);
+      return numberToThai(num, options.wordType);
     case "zh":
       return numberToChinese(num);
     case "zh-TW":
@@ -17,7 +17,7 @@ function numberToWords(lang, num) {
       return num.toString();
   }
 }
-function numberToEnglish(num) {
+function numberToEnglish(num, wordType) {
   const units = [
     "zero",
     "one",
@@ -54,7 +54,7 @@ function numberToEnglish(num) {
   ];
   const scales = ["", "thousand", "million", "billion"];
   if (num === 0) return units[0];
-  if (num < 0) return "negative " + numberToEnglish(-num);
+  if (num < 0) return "negative " + numberToEnglish(-num, wordType);
   function underThousand(n) {
     const hundred = Math.floor(n / 100);
     const rest = n % 100;
@@ -75,9 +75,11 @@ function numberToEnglish(num) {
     }
     return words;
   }
+  const [integerPartStr, decimalPartStr] = num.toString().split(".");
+  const integerPart = parseInt(integerPartStr, 10);
   const parts = [];
   const chunks = [];
-  let tempNum = num;
+  let tempNum = integerPart;
   while (tempNum > 0) {
     chunks.unshift(tempNum % 1e3);
     tempNum = Math.floor(tempNum / 1e3);
@@ -91,17 +93,34 @@ function numberToEnglish(num) {
     const scale = scaleIndex < scales.length ? scales[scaleIndex] : "";
     parts.push(chunkWords + (scale ? " " + scale : ""));
   }
-  return parts.join(" ").trim();
+  let result = parts.join(" ").trim();
+  if (decimalPartStr) {
+    let decimalWords = "";
+    switch (wordType) {
+      case "currency":
+        const firstTwoNumbers = parseInt(decimalPartStr.toString().slice(0, 2));
+        decimalWords = underThousand(firstTwoNumbers);
+        result += ` dollars and ${decimalWords} cents`;
+        break;
+      case "words":
+        decimalWords = decimalPartStr.split("").map((digit) => units[Number(digit)]).join(" ");
+        result += ` point ${decimalWords}`;
+        break;
+    }
+  } else if (wordType === "currency") {
+    result += " dollars";
+  }
+  return result;
 }
-function numberToThai(num) {
+function numberToThai(num, wordType) {
   if (num === 0) return "\u0E28\u0E39\u0E19\u0E22\u0E4C";
-  if (num < 0) return "\u0E25\u0E1A" + numberToThai(-num);
+  if (num < 0) return "\u0E25\u0E1A" + numberToThai(-num, wordType);
   const thDigits = ["\u0E28\u0E39\u0E19\u0E22\u0E4C", "\u0E2B\u0E19\u0E36\u0E48\u0E07", "\u0E2A\u0E2D\u0E07", "\u0E2A\u0E32\u0E21", "\u0E2A\u0E35\u0E48", "\u0E2B\u0E49\u0E32", "\u0E2B\u0E01", "\u0E40\u0E08\u0E47\u0E14", "\u0E41\u0E1B\u0E14", "\u0E40\u0E01\u0E49\u0E32"];
   const thPositions = ["", "\u0E2A\u0E34\u0E1A", "\u0E23\u0E49\u0E2D\u0E22", "\u0E1E\u0E31\u0E19", "\u0E2B\u0E21\u0E37\u0E48\u0E19", "\u0E41\u0E2A\u0E19"];
   const MILLION = 1e6;
   function readNumber(n) {
     if (n === 0) return "";
-    let result = "";
+    let result2 = "";
     const sNum = n.toString();
     const len = sNum.length;
     let needZero = false;
@@ -109,7 +128,7 @@ function numberToThai(num) {
       const digit = parseInt(sNum[i]);
       const pos = len - i - 1;
       if (digit === 0) {
-        if (pos > 1 && result !== "") {
+        if (pos > 1 && result2 !== "") {
           let hasNonZeroAfter = false;
           for (let j = i + 1; j < len; j++) {
             if (parseInt(sNum[j]) !== 0) {
@@ -127,19 +146,21 @@ function numberToThai(num) {
         needZero = false;
       }
       if (pos === 0 && digit === 1 && len > 1) {
-        result += "\u0E40\u0E2D\u0E47\u0E14";
+        result2 += "\u0E40\u0E2D\u0E47\u0E14";
       } else if (pos === 1 && digit === 2) {
-        result += "\u0E22\u0E35\u0E48" + thPositions[pos];
+        result2 += "\u0E22\u0E35\u0E48" + thPositions[pos];
       } else if (pos === 1 && digit === 1) {
-        result += thPositions[pos];
+        result2 += thPositions[pos];
       } else {
-        result += thDigits[digit] + (pos < thPositions.length ? thPositions[pos] : "");
+        result2 += thDigits[digit] + (pos < thPositions.length ? thPositions[pos] : "");
       }
     }
-    return result;
+    return result2;
   }
+  const [integerPartStr, decimalPartStr] = num.toString().split(".");
+  const integerPart = parseInt(integerPartStr, 10);
   const parts = [];
-  let tempNum = num;
+  let tempNum = integerPart;
   while (tempNum >= MILLION) {
     const millionPart = Math.floor(tempNum / MILLION);
     parts.push(readNumber(millionPart) + "\u0E25\u0E49\u0E32\u0E19");
@@ -148,7 +169,24 @@ function numberToThai(num) {
   if (tempNum > 0) {
     parts.push(readNumber(tempNum));
   }
-  return parts.join("");
+  let result = parts.join("").trim();
+  if (decimalPartStr) {
+    let decimalWords = "";
+    switch (wordType) {
+      case "currency":
+        const firstTwoNumbers = parseInt(decimalPartStr.toString().substring(0, 2));
+        decimalWords = readNumber(firstTwoNumbers);
+        result += "\u0E1A\u0E32\u0E17" + decimalWords + "\u0E2A\u0E15\u0E32\u0E07\u0E04\u0E4C";
+        break;
+      case "words":
+        decimalWords = decimalPartStr.split("").map((digit) => thDigits[parseInt(digit)]).join("");
+        result += "\u0E08\u0E38\u0E14" + decimalWords;
+        break;
+    }
+  } else if (wordType === "currency") {
+    result += "\u0E1A\u0E32\u0E17\u0E16\u0E49\u0E27\u0E19";
+  }
+  return result;
 }
 function cjkConvert(num, digits, units, bigUnits, suppressOne) {
   if (num === 0) return digits[0];

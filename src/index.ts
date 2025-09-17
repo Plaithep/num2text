@@ -1,11 +1,15 @@
 // src/index.ts
 
 export type SupportedLang = 'en' | 'th' | 'zh' | 'zh-TW' | 'ja' | 'ko';
+export type SupportedWordType = 'words' | 'currency';
+export type Option = {
+  wordType: SupportedWordType;
+};
 
-export function numberToWords(lang: SupportedLang, num: number): string {
+export function numberToWords(lang: SupportedLang, num: number, options: Option = { wordType: 'words'}): string {
   switch (lang) {
-    case 'en': return numberToEnglish(num);
-    case 'th': return numberToThai(num);
+    case 'en': return numberToEnglish(num, options.wordType);
+    case 'th': return numberToThai(num, options.wordType);
     case 'zh': return numberToChinese(num);
     case 'zh-TW': return numberToTraditionalChinese(num);
     case 'ja': return numberToJapanese(num);
@@ -15,7 +19,7 @@ export function numberToWords(lang: SupportedLang, num: number): string {
 }
 
 // English (up to billion)
-function numberToEnglish(num: number): string {
+function numberToEnglish(num: number, wordType: SupportedWordType): string {
   const units = [
     'zero', 'one', 'two', 'three', 'four', 'five',
     'six', 'seven', 'eight', 'nine', 'ten', 'eleven',
@@ -29,7 +33,7 @@ function numberToEnglish(num: number): string {
   const scales = ['', 'thousand', 'million', 'billion'];
 
   if (num === 0) return units[0];
-  if (num < 0) return 'negative ' + numberToEnglish(-num);
+  if (num < 0) return 'negative ' + numberToEnglish(-num, wordType);
 
   function underThousand(n: number): string {
     const hundred = Math.floor(n / 100);
@@ -53,10 +57,12 @@ function numberToEnglish(num: number): string {
     }
     return words;
   }
+  const [integerPartStr, decimalPartStr] = num.toString().split('.');
+  const integerPart = parseInt(integerPartStr, 10);
 
   const parts: string[] = [];
   const chunks: number[] = [];
-  let tempNum = num;
+  let tempNum = integerPart;
   
   while (tempNum > 0) {
     chunks.unshift(tempNum % 1000);
@@ -73,13 +79,43 @@ function numberToEnglish(num: number): string {
     parts.push(chunkWords + (scale ? ' ' + scale : ''));
   }
 
-  return parts.join(' ').trim();
+  
+  let result = parts.join(' ').trim();
+
+  // Convert decimal part if exists
+  if (decimalPartStr) {
+    let decimalWords = '';
+
+    switch (wordType) {
+      case 'currency':
+        // Take first two digits, convert to words using underThousand
+        const firstTwoNumbers = parseInt(decimalPartStr.toString().slice(0, 2))
+        decimalWords = underThousand(firstTwoNumbers);
+
+        result += ` dollars and ${decimalWords} cents`;
+        break;
+
+      case 'words':
+        // Convert each decimal digit to word
+        decimalWords = decimalPartStr
+          .split('')
+          .map(digit => units[Number(digit)])
+          .join(' ');
+
+        result += ` point ${decimalWords}`;
+        break;
+    }
+  } else if (wordType === 'currency') {
+    result += ' dollars';
+  }
+
+  return result;
 }
 
 // Thai (Fixed)
-function numberToThai(num: number): string {
+function numberToThai(num: number, wordType: SupportedWordType): string {
   if (num === 0) return 'ศูนย์';
-  if (num < 0) return 'ลบ' + numberToThai(-num);
+  if (num < 0) return 'ลบ' + numberToThai(-num, wordType);
   
   const thDigits = ['ศูนย์','หนึ่ง','สอง','สาม','สี่','ห้า','หก','เจ็ด','แปด','เก้า'];
   const thPositions = ['', 'สิบ', 'ร้อย', 'พัน', 'หมื่น', 'แสน'];
@@ -138,8 +174,11 @@ function numberToThai(num: number): string {
     return result;
   }
 
+  const [integerPartStr, decimalPartStr] = num.toString().split('.');
+  const integerPart = parseInt(integerPartStr, 10);
+
   const parts: string[] = [];
-  let tempNum = num;
+  let tempNum = integerPart;
   
   // จัดการหลักล้านขึ้นไป
   while (tempNum >= MILLION) {
@@ -153,7 +192,33 @@ function numberToThai(num: number): string {
     parts.push(readNumber(tempNum));
   }
 
-  return parts.join('');
+  let result = parts.join('').trim();
+
+  // Convert decimal part if exists
+  if (decimalPartStr) {
+    let decimalWords = '';
+
+    switch (wordType) {
+      case 'currency':
+        const firstTwoNumbers = parseInt(decimalPartStr.toString().substring(0, 2));
+        decimalWords = readNumber(firstTwoNumbers);
+        result += 'บาท' + decimalWords + 'สตางค์';
+      break;
+
+      case 'words':
+        decimalWords = decimalPartStr
+          .split('')
+          .map(digit => thDigits[parseInt(digit)])
+          .join('');
+
+        result += 'จุด' + decimalWords;
+      break;
+    }
+  } else if (wordType === 'currency') {
+    result += 'บาทถ้วน';
+  }
+
+  return result;
 }
 
 // CJK Shared Base (Fixed)

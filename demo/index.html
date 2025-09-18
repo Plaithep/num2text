@@ -277,6 +277,7 @@
                                 ${lang.flag}
                                 ${lang.name}
                                 <span style="color: red;">
+                                    ${(lang.code === 'en' && wordType.value === 'currency' ) ? '(USD)' : ''}
                                     ${isSupportCurrency(lang.code) ? 'Not Support' : ''}
                                 </span>
                             </div>
